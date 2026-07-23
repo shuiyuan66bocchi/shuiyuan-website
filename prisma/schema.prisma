@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?
+  content     String?
+  techStack   Json?
+  imageUrl    String?
+  demoUrl     String?
+  repoUrl     String?
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("projects")
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   @unique
+  content   String   // Markdown content
+  excerpt   String?
+  published Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("posts")
+}
+
+model Profile {
+  id        String   @id @default("default")
+  name      String   @default("shuiyuan")
+  title     String   @default("Full-stack developer")
+  avatarUrl String?
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("profiles")
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("contact_messages")
+}
