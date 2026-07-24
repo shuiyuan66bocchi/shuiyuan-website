@@ -1,22 +1,8 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  // Server-side auth check — runs on every /admin page request
-  const adminToken = process.env.ADMIN_TOKEN;
-
-  if (adminToken) {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('admin_token')?.value;
-
-    if (!token || token !== adminToken) {
-      redirect('/');
-    }
-  }
-
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[var(--bg-secondary)]">
       <div className="border-b border-[var(--border-primary)] bg-[var(--bg-primary)]">
