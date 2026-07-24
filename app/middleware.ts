@@ -1,26 +1,28 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
-
 export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
   // Protect /admin routes
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    // Allow requests to static assets and API routes within admin
-    if (request.nextUrl.pathname.startsWith('/admin/projects/new') ||
-        request.nextUrl.pathname.startsWith('/admin/posts/new')) {
-      // These need the token check too
+  if (pathname.startsWith('/admin')) {
+    // Read env var inside the function for better Edge Runtime compatibility
+    const adminToken = process.env.ADMIN_TOKEN;
+
+    // If no ADMIN_TOKEN is configured, allow access (dev mode)
+    if (!adminToken) {
+      console.warn('ADMIN_TOKEN not set — /admin is open to everyone');
+      return NextResponse.next();
     }
 
     const token = request.cookies.get('admin_token')?.value;
 
-    // If no ADMIN_TOKEN is configured, allow access (fallback for dev)
-    if (!ADMIN_TOKEN) {
-      return NextResponse.next();
-    }
-
-    if (!token || token !== ADMIN_TOKEN) {
-      return NextResponse.redirect(new URL('/', request.url));
+    if (!token || token !== adminToken) {
+      // Redirect to home page
+      const url = request.nextUrl.clone();
+      url.pathname = '/';
+      url.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(url);
     }
   }
 
@@ -28,5 +30,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin', '/admin/:path*'],
 };
