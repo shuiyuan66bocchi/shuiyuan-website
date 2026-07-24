@@ -27,7 +27,7 @@ model Post {
   id        String   @id @default(cuid())
   title     String
   slug      String   @unique
-  content   String   // Markdown content
+  content   String
   excerpt   String?
   published Boolean  @default(false)
   createdAt DateTime @default(now()) @map("created_at")

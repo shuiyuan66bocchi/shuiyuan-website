@@ -7,12 +7,9 @@ const globalForPrisma = globalThis as unknown as {
 
 function createPrismaClient() {
   if (process.env.DATABASE_URL) {
-    // Vercel production: use PostgreSQL via pg adapter
     const adapter = new PrismaPg(process.env.DATABASE_URL);
     return new PrismaClient({ adapter });
   }
-
-  // Local dev: no DATABASE_URL → use SQLite (built-in, no adapter needed)
   return new PrismaClient();
 }
 
