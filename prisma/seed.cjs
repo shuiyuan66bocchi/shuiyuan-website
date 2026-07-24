@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');
+const bcrypt = require('bcryptjs');
 
 const prisma = process.env.DATABASE_URL
   ? new PrismaClient({ adapter: new PrismaPg(process.env.DATABASE_URL) })
@@ -8,17 +9,36 @@ const prisma = process.env.DATABASE_URL
 async function main() {
   console.log('Seeding database...');
 
-  await prisma.profile.deleteMany();
+  // ─── Admin Password ───
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  let passwordHash = null;
+
+  if (adminPassword) {
+    passwordHash = await bcrypt.hash(adminPassword, 12);
+    console.log('Admin password hash generated');
+  } else {
+    console.warn('⚠ ADMIN_PASSWORD not set — run with ADMIN_PASSWORD=yourpassword');
+  }
+
+  // ─── Profile ───
+  await prisma.profile.upsert({
+    where: { id: 'default' },
+    update: { passwordHash: passwordHash ?? undefined },
+    create: {
+      id: 'default',
+      name: 'shuiyuan',
+      title: 'Full-stack developer',
+      passwordHash,
+    },
+  });
+  console.log('Profile ready');
+
+  // ─── Clear content data ───
   await prisma.contactMessage.deleteMany();
   await prisma.post.deleteMany();
   await prisma.project.deleteMany();
 
-  await prisma.profile.create({
-    data: { id: 'default', name: 'shuiyuan', title: 'Full-stack developer' },
-  });
-  console.log('Created profile');
-
-  // For PostgreSQL, techStack is a native JSON array
+  // ─── Projects ───
   await Promise.all([
     prisma.project.create({
       data: {
@@ -56,6 +76,7 @@ async function main() {
   ]);
   console.log('Created 3 projects');
 
+  // ─── Blog Posts ───
   await Promise.all([
     prisma.post.create({
       data: {
@@ -87,7 +108,7 @@ async function main() {
   ]);
   console.log('Created 3 blog posts');
 
-  console.log('Database seeding completed!');
+  console.log('Seeding completed!');
 }
 
 main()

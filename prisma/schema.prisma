@@ -37,11 +37,12 @@ model Post {
 }
 
 model Profile {
-  id        String   @id @default("default")
-  name      String   @default("shuiyuan")
-  title     String   @default("Full-stack developer")
-  avatarUrl String?
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  id           String   @id @default("default")
+  name         String   @default("shuiyuan")
+  title        String   @default("Full-stack developer")
+  avatarUrl    String?
+  passwordHash String?
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("profiles")
 }
