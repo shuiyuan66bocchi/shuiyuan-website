@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -6,14 +7,12 @@ const globalForPrisma = globalThis as unknown as {
 
 function createPrismaClient() {
   if (process.env.DATABASE_URL) {
-    // Vercel/Neon: use HTTP-based adapter for serverless
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { PrismaNeonHttp } = require('@prisma/adapter-neon');
-    const adapter = new PrismaNeonHttp(process.env.DATABASE_URL);
+    // Vercel production: use PostgreSQL via pg adapter
+    const adapter = new PrismaPg(process.env.DATABASE_URL);
     return new PrismaClient({ adapter });
   }
 
-  // Local dev: use built-in SQLite or direct connection
+  // Local dev: no DATABASE_URL → use SQLite (built-in, no adapter needed)
   return new PrismaClient();
 }
 

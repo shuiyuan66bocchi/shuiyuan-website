@@ -2,10 +2,10 @@ const { PrismaClient } = require('@prisma/client');
 
 let prisma;
 
-// Try to create client with Neon adapter if DATABASE_URL is set
+// Try to create client with pg adapter if DATABASE_URL is set
 if (process.env.DATABASE_URL) {
-  const { PrismaNeon } = require('@prisma/adapter-neon');
-  const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL });
+  const { PrismaPg } = require('@prisma/adapter-pg');
+  const adapter = new PrismaPg(process.env.DATABASE_URL);
   prisma = new PrismaClient({ adapter });
 } else {
   prisma = new PrismaClient();
