@@ -9,19 +9,30 @@ export const dynamic = 'force-dynamic';
 const projectIcons = [Globe, Server, Database, Code] as const;
 
 export default async function HomePage() {
-  const [projects, posts, profile] = await Promise.all([
-    prisma.project.findMany({
-      where: { featured: true },
-      orderBy: { createdAt: 'desc' },
-      take: 4,
-    }),
-    prisma.post.findMany({
-      where: { published: true },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-    }),
-    prisma.profile.findUnique({ where: { id: 'default' } }),
-  ]);
+  let projects: Awaited<ReturnType<typeof prisma.project.findMany>> = [];
+  let posts: Awaited<ReturnType<typeof prisma.post.findMany>> = [];
+  let profile: Awaited<ReturnType<typeof prisma.profile.findUnique>> = null;
+
+  try {
+    const data = await Promise.all([
+      prisma.project.findMany({
+        where: { featured: true },
+        orderBy: { createdAt: 'desc' },
+        take: 4,
+      }),
+      prisma.post.findMany({
+        where: { published: true },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      }),
+      prisma.profile.findUnique({ where: { id: 'default' } }),
+    ]);
+    projects = data[0];
+    posts = data[1];
+    profile = data[2];
+  } catch (error) {
+    console.error('Failed to load data:', error);
+  }
 
   return (
     <div>
