@@ -1,9 +1,10 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { writeFile, mkdir, access } from 'fs/promises';
-import path from 'path';
 
 export const dynamic = 'force-dynamic';
+
+/** Maximum base64 image size: 500KB (prevents abuse) */
+const MAX_IMAGE_SIZE = 500 * 1024;
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,45 +12,35 @@ export async function POST(request: NextRequest) {
     const { image } = body;
 
     if (!image || typeof image !== 'string') {
-      return Response.json({ error: 'No image data provided', detail: typeof image }, { status: 400 });
+      return Response.json(
+        { error: 'No image data provided' },
+        { status: 400 }
+      );
     }
 
-    // Check if it's a valid data URL
     if (!image.startsWith('data:image/')) {
-      return Response.json({ error: 'Not a valid image data URL', detail: image.slice(0, 50) }, { status: 400 });
+      return Response.json(
+        { error: 'Not a valid image data URL' },
+        { status: 400 }
+      );
     }
 
-    // Decode base64 image
-    const matches = image.match(/^data:image\/(\w+);base64,(.+)$/);
-    if (!matches) {
-      return Response.json({ error: 'Invalid image format - regex failed' }, { status: 400 });
+    // Reject oversized images
+    if (image.length > MAX_IMAGE_SIZE) {
+      return Response.json(
+        { error: 'Image too large. Maximum 500KB.' },
+        { status: 400 }
+      );
     }
 
-    const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
-    const buffer = Buffer.from(matches[2], 'base64');
-
-    if (buffer.length === 0) {
-      return Response.json({ error: 'Decoded buffer is empty' }, { status: 400 });
-    }
-
-    const avatarDir = path.join(process.cwd(), 'public', 'avatars');
-    const filepath = path.join(avatarDir, `avatar.${ext}`);
-
-    // Ensure directory exists
-    await mkdir(avatarDir, { recursive: true });
-
-    // Write file
-    await writeFile(filepath, buffer);
-
-    // Update profile in DB
-    const avatarUrl = `/avatars/avatar.${ext}`;
+    // Store base64 directly in the database (works on Vercel's read-only filesystem)
     await prisma.profile.upsert({
       where: { id: 'default' },
-      update: { avatarUrl },
-      create: { id: 'default', avatarUrl },
+      update: { avatarUrl: image },
+      create: { id: 'default', avatarUrl: image },
     });
 
-    return Response.json({ avatarUrl });
+    return Response.json({ avatarUrl: image });
   } catch (error) {
     console.error('Upload avatar error:', error);
     const msg = error instanceof Error ? error.message : String(error);

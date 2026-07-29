@@ -4,7 +4,6 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Cropper, { Area, Point } from 'react-easy-crop';
 import { Save, Camera, X, Check } from 'lucide-react';
-import Image from 'next/image';
 
 interface Profile {
   id: string;
@@ -156,7 +155,7 @@ export default function ProfilePage() {
             <div className="relative group">
               <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-[var(--border-primary)] bg-[var(--bg-secondary)]">
                 {profile?.avatarUrl ? (
-                  <Image src={profile.avatarUrl} alt="Avatar" width={96} height={96} className="h-full w-full object-cover" />
+                  <img src={profile.avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
                 ) : (
                   <span className="text-3xl font-bold text-[var(--accent-blue)]">
                     {(profile?.name || 'S').charAt(0).toUpperCase()}

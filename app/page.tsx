@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
 import { Calendar, Globe, Server, Database, Code } from 'lucide-react';
 import FloatingAddButton from '@/components/layout/FloatingAddButton';
@@ -47,13 +46,10 @@ export default async function HomePage() {
             >
               <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-[var(--border-primary)] bg-[var(--bg-secondary)] md:h-20 md:w-20">
                 {profile?.avatarUrl ? (
-                  <Image
+                  <img
                     src={profile.avatarUrl}
                     alt="Avatar"
-                    width={80}
-                    height={80}
                     className="h-full w-full object-cover"
-                    priority
                   />
                 ) : (
                   <span className="text-2xl font-bold text-[var(--accent-blue)] md:text-3xl">
