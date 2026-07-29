@@ -4,6 +4,14 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * One-click database setup endpoint.
+ * - Generates bcrypt password hash from ADMIN_PASSWORD or ADMIN_TOKEN env var
+ * - Seeds sample projects and blog posts if the database is empty
+ *
+ * Usage: visit /api/seed in your browser
+ */
+
 export async function GET() {
   try {
     const log: string[] = [];
