@@ -1,73 +1,95 @@
 import { prisma } from '@/lib/prisma';
+import { hashPassword } from '@/lib/auth/password';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Check if already seeded
-    const existingProjects = await prisma.project.count();
-    if (existingProjects > 0) {
-      return NextResponse.json({ message: 'Database already has data, skipping seed.' });
+    const log: string[] = [];
+
+    // ─── 1. Always set admin password if ADMIN_PASSWORD is configured ───
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    if (adminPassword) {
+      const hash = await hashPassword(adminPassword);
+      await prisma.profile.upsert({
+        where: { id: 'default' },
+        update: { passwordHash: hash },
+        create: { id: 'default', name: 'shuiyuan', title: 'Full-stack developer', passwordHash: hash },
+      });
+      log.push('✅ Password hash set — you can now log in via /login');
+    } else {
+      // Fallback for legacy ADMIN_TOKEN
+      const adminToken = process.env.ADMIN_TOKEN;
+      if (adminToken) {
+        const hash = await hashPassword(adminToken);
+        await prisma.profile.upsert({
+          where: { id: 'default' },
+          update: { passwordHash: hash },
+          create: { id: 'default', name: 'shuiyuan', title: 'Full-stack developer', passwordHash: hash },
+        });
+        log.push('✅ Password hash set from ADMIN_TOKEN (migrated to ADMIN_PASSWORD)');
+      } else {
+        log.push('⚠ No ADMIN_PASSWORD or ADMIN_TOKEN set — login will not work');
+      }
     }
 
-    // Create profile
-    await prisma.profile.upsert({
-      where: { id: 'default' },
-      update: {},
-      create: { id: 'default', name: 'shuiyuan', title: 'Full-stack developer' },
-    });
+    // ─── 2. Seed content if empty ───
+    const existingProjects = await prisma.project.count();
+    if (existingProjects === 0) {
+      await prisma.project.createMany({
+        data: [
+          {
+            title: 'Portfolio Website',
+            slug: 'portfolio-website',
+            description: 'A modern, responsive portfolio website built with Next.js and Tailwind CSS.',
+            techStack: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Vercel'],
+            featured: true,
+          },
+          {
+            title: 'E-commerce Platform',
+            slug: 'ecommerce-platform',
+            description: 'Full-stack e-commerce solution with product catalog and secure checkout.',
+            techStack: ['React', 'Node.js', 'PostgreSQL', 'Prisma'],
+            featured: true,
+          },
+          {
+            title: 'Task Management App',
+            slug: 'task-management-app',
+            description: 'Productivity application for managing tasks and projects.',
+            techStack: ['React', 'Firebase', 'Tailwind CSS'],
+            featured: true,
+          },
+        ],
+      });
 
-    // Create projects
-    await prisma.project.createMany({
-      data: [
-        {
-          title: 'Portfolio Website',
-          slug: 'portfolio-website',
-          description: 'A modern, responsive portfolio website built with Next.js and Tailwind CSS.',
-          techStack: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Vercel'],
-          featured: true,
-        },
-        {
-          title: 'E-commerce Platform',
-          slug: 'ecommerce-platform',
-          description: 'Full-stack e-commerce solution with product catalog, shopping cart, and secure checkout.',
-          techStack: ['React', 'Node.js', 'PostgreSQL', 'Prisma'],
-          featured: true,
-        },
-        {
-          title: 'Task Management App',
-          slug: 'task-management-app',
-          description: 'Productivity application for managing tasks and projects.',
-          techStack: ['React', 'Firebase', 'Tailwind CSS'],
-          featured: true,
-        },
-      ],
-    });
+      await prisma.post.createMany({
+        data: [
+          {
+            title: 'Getting Started with Next.js 16',
+            slug: 'getting-started-with-nextjs-16',
+            content: '# Getting Started with Next.js 16\n\nNext.js 16 brings a host of new features.',
+            excerpt: 'Explore the key changes in Next.js 16.',
+            published: true,
+          },
+          {
+            title: 'Understanding Prisma 7',
+            slug: 'understanding-prisma-7',
+            content: '# Understanding Prisma 7\n\nPrisma 7 introduces a new configuration system.',
+            excerpt: 'A comprehensive guide to Prisma 7.',
+            published: true,
+          },
+        ],
+      });
 
-    await prisma.post.createMany({
-      data: [
-        {
-          title: 'Getting Started with Next.js 16',
-          slug: 'getting-started-with-nextjs-16',
-          content: `# Getting Started with Next.js 16\n\nNext.js 16 brings a host of new features and improvements.\n\n## What's New\n\n- **Stable Caching**: The cacheLife and cacheTag APIs are now stable\n- **Async Params**: Route handler params are now always async\n- **Improved Server Actions**: Better developer experience for mutations\n`,
-          excerpt: 'Explore the key changes in Next.js 16.',
-          published: true,
-        },
-        {
-          title: 'Understanding Prisma 7',
-          slug: 'understanding-prisma-7',
-          content: `# Understanding Prisma 7\n\nPrisma 7 introduces a new configuration system.\n\n## Key Changes\n\n### Config File Required\n\nThe url field has been moved to prisma.config.ts.\n\n### Driver Adapters Required\n\nYou must use a driver adapter when creating PrismaClient.\n`,
-          excerpt: 'A comprehensive guide to Prisma 7.',
-          published: true,
-        },
-      ],
-    });
+      log.push('✅ Created 3 projects and 2 blog posts');
+    } else {
+      log.push('ℹ Content data already exists, skipped');
+    }
 
     return NextResponse.json({
-      message: 'Database seeded successfully!',
-      projects: 3,
-      posts: 2,
+      message: log.join('<br>'),
+      steps: log,
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
