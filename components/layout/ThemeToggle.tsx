@@ -4,15 +4,21 @@ import { useEffect, useState } from 'react';
 import { Sun, Moon } from 'lucide-react';
 
 export default function ThemeToggle() {
-  const [dark, setDark] = useState(false);
+  // Read initial state from the class set by the inline script (avoids flash)
+  const [dark, setDark] = useState(() => {
+    if (typeof document === 'undefined') return false;
+    return document.documentElement.classList.contains('dark');
+  });
 
   useEffect(() => {
-    // Check system preference or local storage
     const stored = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const isDark = stored ? stored === 'dark' : prefersDark;
-    setDark(isDark);
-    document.documentElement.classList.toggle('dark', isDark);
+    // Sync on mount in case script didn't run
+    if (!stored) {
+      const isDark = prefersDark;
+      setDark(isDark);
+      document.documentElement.classList.toggle('dark', isDark);
+    }
   }, []);
 
   function toggle() {

@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/auth/apiAuth';
 
 type RouteContext = {
   params: Promise<{ slug: string }>;
@@ -25,8 +26,11 @@ export async function GET(_request: NextRequest, context: RouteContext) {
   }
 }
 
-// PUT /api/posts/:slug — Update a post by slug
+// PUT /api/posts/:slug — Update a post by slug (requires auth)
 export async function PUT(request: NextRequest, context: RouteContext) {
+  const authError = await requireAuth();
+  if (authError) return authError;
+
   try {
     const { slug } = await context.params;
     const body = await request.json();
@@ -65,8 +69,11 @@ export async function PUT(request: NextRequest, context: RouteContext) {
   }
 }
 
-// DELETE /api/posts/:slug — Delete a post by slug
+// DELETE /api/posts/:slug — Delete a post by slug (requires auth)
 export async function DELETE(_request: NextRequest, context: RouteContext) {
+  const authError = await requireAuth();
+  if (authError) return authError;
+
   try {
     const { slug } = await context.params;
 

@@ -6,7 +6,16 @@ import { Plus, FileText, FolderGit2 } from 'lucide-react';
 
 export default function FloatingAddButton() {
   const [isOpen, setIsOpen] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Check if the user is logged in via the auth status endpoint
+    fetch('/api/auth/status')
+      .then((res) => res.json())
+      .then((data) => setAuthenticated(data.authenticated))
+      .catch(() => setAuthenticated(false));
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -17,6 +26,9 @@ export default function FloatingAddButton() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Don't render the FAB for unauthenticated users
+  if (!authenticated) return null;
 
   return (
     <div className="fixed bottom-6 right-6 z-50" ref={menuRef}>

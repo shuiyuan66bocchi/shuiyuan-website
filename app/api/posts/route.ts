@@ -1,12 +1,19 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAuth, isAuthenticated } from '@/lib/auth/apiAuth';
 
 // GET /api/posts — List all published posts (public)
-// GET /api/posts?all=true — List all posts including drafts (admin)
+// GET /api/posts?all=true — List all posts including drafts (requires auth)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const showAll = searchParams.get('all') === 'true';
+
+    // Only authenticated admins can see draft posts
+    if (showAll) {
+      const authError = await requireAuth();
+      if (authError) return authError;
+    }
 
     const posts = await prisma.post.findMany({
       where: showAll ? {} : { published: true },
@@ -29,8 +36,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/posts — Create a new blog post
+// POST /api/posts — Create a new blog post (requires auth)
 export async function POST(request: NextRequest) {
+  const authError = await requireAuth();
+  if (authError) return authError;
+
   try {
     const body = await request.json();
     const { title, slug, content, excerpt, published } = body;

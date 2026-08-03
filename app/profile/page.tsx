@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Cropper, { Area, Point } from 'react-easy-crop';
 import { Save, Camera, X, Check } from 'lucide-react';
+import { PageHeader, Button } from '@/components/ui';
 
 interface Profile {
   id: string;
@@ -139,13 +140,7 @@ export default function ProfilePage() {
 
   return (
     <div>
-      {/* Header */}
-      <div className="border-b border-[var(--border-primary)]">
-        <div className="mx-auto max-w-2xl px-4 py-12 md:px-6">
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] md:text-3xl">Profile</h1>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">Edit your personal information</p>
-        </div>
-      </div>
+      <PageHeader title="Profile" description="Edit your personal information" />
 
       <div className="mx-auto max-w-2xl px-4 py-8 md:px-6">
         {/* Avatar Section */}
@@ -208,14 +203,9 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="inline-flex items-center gap-1.5 rounded-md bg-[var(--accent-green)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-green-hover)] disabled:opacity-50"
-        >
-          <Save className="h-4 w-4" />
+        <Button onClick={handleSave} disabled={saving} icon={Save}>
           {saving ? 'Saving...' : 'Save Changes'}
-        </button>
+        </Button>
       </div>
 
       {/* Crop Modal */}
@@ -259,18 +249,12 @@ export default function ProfilePage() {
 
             {/* Actions */}
             <div className="mt-4 flex justify-end gap-2">
-              <button
-                onClick={() => setImageSrc(null)}
-                className="rounded-md border border-[var(--border-primary)] bg-[var(--bg-primary)] px-4 py-2 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]"
-              >
+              <Button variant="outline" size="sm" onClick={() => setImageSrc(null)}>
                 Cancel
-              </button>
-              <button
-                onClick={handleCropAndUpload}
-                className="inline-flex items-center gap-1 rounded-md bg-[var(--accent-blue)] px-4 py-2 text-xs font-medium text-white hover:bg-[var(--accent-blue-hover)]"
-              >
-                <Check className="h-3.5 w-3.5" /> Apply
-              </button>
+              </Button>
+              <Button variant="secondary" size="sm" onClick={handleCropAndUpload} icon={Check}>
+                Apply
+              </Button>
             </div>
           </div>
         </div>

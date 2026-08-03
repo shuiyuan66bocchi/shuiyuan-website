@@ -1,25 +1,15 @@
 import { ArrowRight, Briefcase, GraduationCap, MapPin, Calendar } from 'lucide-react';
 import Link from 'next/link';
+import { skills } from '@/data/skills';
+import { PageHeader, Button } from '@/components/ui';
 
 export default function AboutPage() {
   return (
     <div>
-      {/* Header */}
-      <div className="border-b border-[var(--border-primary)]">
-        <div className="mx-auto max-w-3xl px-4 py-12 md:px-6">
-          <div className="flex items-center gap-6">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[var(--border-primary)] bg-[var(--bg-secondary)] md:h-20 md:w-20">
-              <span className="text-2xl font-bold text-[var(--accent-blue)] md:text-3xl">S</span>
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-[var(--text-primary)] md:text-3xl">About Me</h1>
-              <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                Full-stack developer passionate about modern web technologies
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="About Me"
+        description="Full-stack developer passionate about modern web technologies"
+      />
 
       <div className="mx-auto max-w-3xl px-4 py-8 md:px-6">
         {/* Bio */}
@@ -42,13 +32,12 @@ export default function AboutPage() {
         <div className="mb-10">
           <h2 className="mb-3 text-base font-semibold text-[var(--text-primary)]">Core Skills</h2>
           <div className="flex flex-wrap gap-2">
-            {['React', 'Next.js', 'TypeScript', 'Node.js', 'PostgreSQL', 'Tailwind CSS', 'Prisma', 'Git'].map(
-              (skill) => (
+            {skills.map((skill) => (
                 <span
-                  key={skill}
+                  key={skill.name}
                   className="rounded-full border border-[var(--border-primary)] bg-[var(--bg-secondary)] px-3 py-1 text-xs font-medium text-[var(--text-secondary)]"
                 >
-                  {skill}
+                  {skill.name}
                 </span>
               ),
             )}
@@ -113,11 +102,10 @@ export default function AboutPage() {
           <p className="mb-4 text-sm text-[var(--text-secondary)]">
             Interested in working together or have a project in mind?
           </p>
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-1 text-sm font-medium text-[var(--accent-blue)] hover:underline"
-          >
-            Get in touch <ArrowRight className="h-3 w-3" />
+          <Link href="/contact">
+            <Button variant="secondary" size="sm">
+              Get in touch <ArrowRight className="ml-1 h-3 w-3" />
+            </Button>
           </Link>
         </div>
       </div>

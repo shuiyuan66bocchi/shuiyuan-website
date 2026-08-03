@@ -8,9 +8,9 @@ export const dynamic = 'force-dynamic';
 const projectIcons = [Globe, Server, Database, Code] as const;
 
 export default async function HomePage() {
-  let projects: Awaited<ReturnType<typeof prisma.project.findMany>> = [];
-  let posts: Awaited<ReturnType<typeof prisma.post.findMany>> = [];
-  let profile: Awaited<ReturnType<typeof prisma.profile.findUnique>> = null;
+  let projects: { id: string; title: string; slug: string; description: string | null; demoUrl: string | null; repoUrl: string | null }[] = [];
+  let posts: { id: string; title: string; slug: string; excerpt: string | null; createdAt: Date }[] = [];
+  let profile: { name: string; title: string | null; avatarUrl: string | null } | null = null;
 
   try {
     const data = await Promise.all([
@@ -91,7 +91,7 @@ export default async function HomePage() {
                 return (
                   <Link
                     key={project.id}
-                    href={`/admin/projects/${project.id}/edit`}
+                    href={project.demoUrl || project.repoUrl || '#'}
                     className="flex items-center gap-3 rounded-md border border-[var(--border-primary)] bg-[var(--bg-primary)] px-4 py-3 transition-colors hover:border-[var(--text-tertiary)]"
                   >
                     <div className="rounded-md bg-[var(--bg-secondary)] p-1.5">

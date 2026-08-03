@@ -1,12 +1,16 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/auth/apiAuth';
 
 export const dynamic = 'force-dynamic';
 
 /** Maximum base64 image size: 500KB (prevents abuse) */
 const MAX_IMAGE_SIZE = 500 * 1024;
 
+// POST /api/profile/avatar — Upload avatar (requires auth)
 export async function POST(request: NextRequest) {
+  const authError = await requireAuth();
+  if (authError) return authError;
   try {
     const body = await request.json();
     const { image } = body;

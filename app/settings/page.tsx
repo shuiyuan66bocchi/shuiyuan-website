@@ -2,39 +2,27 @@
 
 import { useEffect, useState } from 'react';
 import { Sun, Moon, Monitor } from 'lucide-react';
+import { PageHeader } from '@/components/ui';
 
 type Theme = 'light' | 'dark' | 'system';
 
 export default function SettingsPage() {
-  const [theme, setTheme] = useState<Theme>('system');
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof document === 'undefined') return 'system';
+    const stored = localStorage.getItem('theme') as Theme | null;
+    if (stored) return stored;
+    return 'system';
+  });
 
   useEffect(() => {
-    const stored = localStorage.getItem('theme') as Theme | null;
-    if (stored) {
-      setTheme(stored);
-      applyTheme(stored);
-    } else {
-      setTheme('system');
+    // Ensure class matches stored preference on mount
+    if (theme === 'system') {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       document.documentElement.classList.toggle('dark', prefersDark);
-    }
-  }, []);
-
-  function applyTheme(t: Theme) {
-    if (t === 'system') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      document.documentElement.classList.toggle('dark', prefersDark);
-      localStorage.removeItem('theme');
     } else {
-      document.documentElement.classList.toggle('dark', t === 'dark');
-      localStorage.setItem('theme', t);
+      document.documentElement.classList.toggle('dark', theme === 'dark');
     }
-  }
-
-  function handleChange(t: Theme) {
-    setTheme(t);
-    applyTheme(t);
-  }
+  }, [theme]);
 
   const options: { value: Theme; label: string; icon: typeof Sun }[] = [
     { value: 'light', label: 'Light', icon: Sun },
@@ -44,15 +32,10 @@ export default function SettingsPage() {
 
   return (
     <div>
-      {/* Header */}
-      <div className="border-b border-[var(--border-primary)]">
-        <div className="mx-auto max-w-3xl px-4 py-12 md:px-6">
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] md:text-3xl">Settings</h1>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
-            Customize your experience
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Settings"
+        description="Customize your experience"
+      />
 
       <div className="mx-auto max-w-3xl px-4 py-8 md:px-6">
         {/* Appearance */}
@@ -69,7 +52,16 @@ export default function SettingsPage() {
               return (
                 <button
                   key={opt.value}
-                  onClick={() => handleChange(opt.value)}
+                  onClick={() => {
+                    setTheme(opt.value);
+                    if (opt.value === 'system') {
+                      localStorage.removeItem('theme');
+                      document.documentElement.classList.toggle('dark', window.matchMedia('(prefers-color-scheme: dark)').matches);
+                    } else {
+                      localStorage.setItem('theme', opt.value);
+                      document.documentElement.classList.toggle('dark', opt.value === 'dark');
+                    }
+                  }}
                   className={`flex flex-1 flex-col items-center gap-2 rounded-md border p-5 transition-all ${
                     selected
                       ? 'border-[var(--accent-blue)] bg-[var(--accent-blue-bg)]'

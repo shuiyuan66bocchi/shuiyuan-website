@@ -5,7 +5,7 @@ const footerLinks = [
   { name: 'Projects', href: '/projects' },
   { name: 'Blog', href: '/blog' },
   { name: 'About', href: '/about' },
-  { name: 'Settings', href: '/settings' },
+  { name: 'Contact', href: '/contact' },
 ] as const;
 
 export default function Footer() {

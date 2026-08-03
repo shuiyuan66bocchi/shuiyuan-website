@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { ExternalLink } from 'lucide-react';
 import MdUploadProjectButton from '@/components/admin/MdUploadProjectButton';
+import { PageHeader } from '@/components/ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,20 +12,12 @@ export default async function ProjectsPage() {
 
   return (
     <div>
-      {/* Header */}
-      <div className="border-b border-[var(--border-primary)]">
-        <div className="mx-auto max-w-5xl px-4 py-12 md:px-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-[var(--text-primary)] md:text-3xl">Projects</h1>
-              <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                A collection of my recent work and contributions
-              </p>
-            </div>
-            <MdUploadProjectButton />
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title="Projects"
+        description="A collection of my recent work and contributions"
+      >
+        <div className="mt-4"><MdUploadProjectButton /></div>
+      </PageHeader>
 
       {/* Project List */}
       <div className="mx-auto max-w-5xl px-4 py-8 md:px-6">

@@ -1,8 +1,10 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/auth/apiAuth';
 
 export const dynamic = 'force-dynamic';
 
+// GET /api/profile — Public profile (accessible without auth)
 export async function GET() {
   try {
     let profile = await prisma.profile.findUnique({ where: { id: 'default' } });
@@ -18,7 +20,10 @@ export async function GET() {
   }
 }
 
+// PUT /api/profile — Update profile (requires auth)
 export async function PUT(request: NextRequest) {
+  const authError = await requireAuth();
+  if (authError) return authError;
   try {
     const body = await request.json();
     const { name, title } = body;

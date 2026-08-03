@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/auth/apiAuth';
 
 export async function GET() {
   try {
@@ -17,6 +18,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const authError = await requireAuth();
+  if (authError) return authError;
+
   try {
     const body = await request.json();
     const { title, slug, description, content, techStack, demoUrl, repoUrl, featured } = body;
