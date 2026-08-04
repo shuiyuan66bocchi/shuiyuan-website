@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { ExternalLink } from 'lucide-react';
 import MdUploadProjectButton from '@/components/admin/MdUploadProjectButton';
@@ -32,15 +33,16 @@ export default async function ProjectsPage() {
                     : [];
 
               return (
-                <div
+                <Link
                   key={project.id}
-                  className="rounded-md border border-[var(--border-primary)] bg-[var(--bg-primary)] p-5 transition-colors hover:border-[var(--text-tertiary)]"
+                  href={`/projects/${project.slug}`}
+                  className="group rounded-md border border-[var(--border-primary)] bg-[var(--bg-primary)] p-5 transition-colors hover:border-[var(--text-tertiary)]"
                 >
                   <div className="mb-3 flex items-center gap-2">
                     <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--bg-secondary)] text-sm font-bold text-[var(--accent-blue)]">
                       {project.title.charAt(0)}
                     </div>
-                    <h3 className="text-base font-semibold text-[var(--text-primary)]">
+                    <h3 className="text-base font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent-blue)]">
                       {project.title}
                     </h3>
                   </div>
@@ -48,7 +50,7 @@ export default async function ProjectsPage() {
                     {project.description || 'No description available.'}
                   </p>
                   {techStack.length > 0 && (
-                    <div className="mb-4 flex flex-wrap gap-1">
+                    <div className="mb-3 flex flex-wrap gap-1">
                       {techStack.map((tech: string, i: number) => (
                         <span
                           key={i}
@@ -59,31 +61,10 @@ export default async function ProjectsPage() {
                       ))}
                     </div>
                   )}
-                  {(project.demoUrl || project.repoUrl) && (
-                    <div className="flex items-center gap-4 border-t border-[var(--border-secondary)] pt-3">
-                      {project.demoUrl && (
-                        <a
-                          href={project.demoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs font-medium text-[var(--accent-blue)] hover:underline"
-                        >
-                          <ExternalLink className="h-3 w-3" /> Demo
-                        </a>
-                      )}
-                      {project.repoUrl && (
-                        <a
-                          href={project.repoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                        >
-                          <ExternalLink className="h-3 w-3" /> Code
-                        </a>
-                      )}
-                    </div>
-                  )}
-                </div>
+                  <div className="flex items-center gap-1 text-xs font-medium text-[var(--accent-blue)] opacity-0 group-hover:opacity-100">
+                    View details <ExternalLink className="h-3 w-3" />
+                  </div>
+                </Link>
               );
             })}
           </div>

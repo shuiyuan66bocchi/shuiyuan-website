@@ -91,8 +91,10 @@ export default async function HomePage() {
                 return (
                   <Link
                     key={project.id}
-                    href={project.demoUrl || project.repoUrl || '#'}
+                    href={project.demoUrl || project.repoUrl || `/projects/${project.slug}`}
                     className="flex items-center gap-3 rounded-md border border-[var(--border-primary)] bg-[var(--bg-primary)] px-4 py-3 transition-colors hover:border-[var(--text-tertiary)]"
+                    target={project.demoUrl || project.repoUrl ? '_blank' : undefined}
+                    rel={project.demoUrl || project.repoUrl ? 'noopener noreferrer' : undefined}
                   >
                     <div className="rounded-md bg-[var(--bg-secondary)] p-1.5">
                       <Icon className="h-4 w-4 text-[var(--accent-blue)]" />

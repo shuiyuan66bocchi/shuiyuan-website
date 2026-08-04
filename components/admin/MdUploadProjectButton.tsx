@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Upload, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { parseFrontmatter, slugify } from '@/lib/utils/markdown';
@@ -10,6 +10,14 @@ export default function MdUploadProjectButton() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<'idle' | 'parsing' | 'uploading' | 'done' | 'error'>('idle');
   const [msg, setMsg] = useState('');
+  const [authenticated, setAuthenticated] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/auth/status')
+      .then((res) => res.json())
+      .then((data) => setAuthenticated(data.authenticated))
+      .catch(() => {});
+  }, []);
 
   async function handleFile(file: File) {
     if (!file.name.endsWith('.md')) {
@@ -63,6 +71,8 @@ export default function MdUploadProjectButton() {
       setTimeout(() => { setStatus('idle'); setMsg(''); }, 3000);
     }
   }
+
+  if (!authenticated) return null;
 
   return (
     <div className="relative inline-flex">
